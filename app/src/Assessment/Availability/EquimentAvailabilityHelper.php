@@ -38,12 +38,9 @@ abstract class EquimentAvailabilityHelper {
 	 */
 	public final function availableStockPerEquipment(int $equipment_id) : int {
 		try {
-			/* Prepare the query to return the stock for given equipment_id */
 			$stmt = $this->getDatabaseConnection()->prepare("SELECT stock FROM equipment WHERE id = :equipment_id");
 			$stmt->bindParam(":equipment_id", $equipment_id, PDO::PARAM_INT);
 			$stmt->execute();
-
-			/* Get the results as number and return the result */
 			$aRows = $stmt->fetch(PDO::FETCH_NUM);
 			return $aRows[0];
 
@@ -59,21 +56,15 @@ abstract class EquimentAvailabilityHelper {
 	 */
 	public final function getResultsByRange(int $equipment_id, DateTime $start, DateTime $end) : array {
 		try {
-			/* Convert DateTime $start and $end to string in an array */
 			$arrayDates = EquimentAvailabilityHelper::formatDateTimeToString($start, $end);
-
-			/* Prepare the query with the parameters */
+			
 			$strSql = " SELECT equipment as equipment_id, SUM(quantity) AS qty_planned FROM planning WHERE start < :end AND end > :start ";
-
-			/* Add the equipment id to the query if provided */
 			if ($equipment_id > 0) {
 				$strSql.= " AND equipment = :equipment_id ";
 			}
 			$strSql.= " GROUP BY equipment_id ORDER BY equipment_id ASC ";
-
 			$stmt = $this->getDatabaseConnection()->prepare($strSql);
-
-			/* Bind the equipment id to the query if provided */
+			
 			if ($equipment_id > 0) {
 				$stmt->bindParam(":equipment_id", $equipment_id, PDO::PARAM_INT);
 			}
@@ -97,10 +88,8 @@ abstract class EquimentAvailabilityHelper {
 	 * @return int
 	 */
 	public final function formatDateTimeToString(DateTime $start, DateTime $end) : array {
-		/* Convert DateTime to string */
 		$startString = date_format($start, "Y-m-d");
 		$endString = date_format($end, "Y-m-d");
-		/* Add strings to array */
 		$datesArray = array('start' => $startString, 'end' => $endString);
 		return $datesArray;
 	}
